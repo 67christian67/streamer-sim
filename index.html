@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamOS • Creator Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* Cool dark abstract desktop wallpaper */
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; 
+            overflow: hidden; 
+            user-select: none; 
+        }
+        
+        .window-glass { 
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+        }
+        
+        /* Custom Scrollbar for Chat */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col text-white">
+
+    <div class="flex-1 p-6 flex flex-col gap-6 items-start">
+        <div class="flex flex-col items-center gap-2 w-20 hover:bg-white/10 p-2 rounded cursor-pointer transition">
+            <span class="text-4xl">🎥</span>
+            <span class="text-xs font-semibold drop-shadow-md text-center">OBS Studio</span>
+        </div>
+        <div class="flex flex-col items-center gap-2 w-20 hover:bg-white/10 p-2 rounded cursor-pointer transition">
+            <span class="text-4xl">🎮</span>
+            <span class="text-xs font-semibold drop-shadow-md text-center">Game.exe</span>
+        </div>
+        <div class="flex flex-col items-center gap-2 w-20 hover:bg-white/10 p-2 rounded cursor-pointer transition">
+            <span class="text-4xl">🎵</span>
+            <span class="text-xs font-semibold drop-shadow-md text-center">Music</span>
+        </div>
+    </div>
+
+    <div id="dashboard-window" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] window-glass rounded-xl flex flex-col overflow-hidden shadow-2xl transition-transform">
+        
+        <div class="bg-slate-900/80 p-3 flex justify-between items-center border-b border-white/10 cursor-move" id="window-header">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 cursor-pointer"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer"></div>
+                <span class="ml-2 text-xs font-bold text-slate-400 tracking-wider">CREATOR DASHBOARD</span>
+            </div>
+            <div id="stream-status" class="text-xs font-mono text-slate-500 font-bold">⚫ OFFLINE</div>
+        </div>
+
+        <div class="flex-1 flex p-4 gap-4">
+            
+            <div class="flex-1 flex flex-col gap-4">
+                
+                <div class="h-64 bg-black rounded-lg border border-slate-700 flex items-center justify-center relative overflow-hidden group">
+                    <span id="preview-text" class="text-slate-600 font-mono text-sm">STREAM PREVIEW DISABLED</span>
+                    
+                    <div id="live-feed" class="absolute inset-0 bg-indigo-900 hidden flex flex-col items-center justify-center">
+                        <span class="text-6xl mb-4 animate-bounce">🎮</span>
+                        <span class="text-indigo-300 font-bold uppercase tracking-widest">Playing Game.exe</span>
+                    </div>
+
+                    <div class="absolute top-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] font-mono border border-slate-700">
+                        <span id="viewer-count" class="text-slate-400">0</span> VIEWERS
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="btn-stream" class="bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-bold text-sm transition shadow-lg flex justify-center items-center gap-2">
+                        <span>📡</span> Start Streaming
+                    </button>
+                    <button class="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-bold text-sm transition shadow-lg flex justify-center items-center gap-2">
+                        <span>🎬</span> Run 30s Ad
+                    </button>
+                    <button class="bg-fuchsia-600 hover:bg-fuchsia-500 py-3 rounded-lg font-bold text-sm transition shadow-lg flex justify-center items-center gap-2">
+                        <span>🔮</span> Start Prediction
+                    </button>
+                    <button class="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-bold text-sm transition shadow-lg flex justify-center items-center gap-2">
+                        <span>🛡️</span> Mod Actions
+                    </button>
+                </div>
+                
+                <div class="flex-1 bg-slate-900/50 border border-slate-700 rounded-lg p-3 overflow-hidden flex flex-col">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Activity Feed</span>
+                    <div id="activity-log" class="flex-1 overflow-y-auto space-y-1 text-xs font-mono">
+                        <div class="text-slate-400">[SYSTEM] OS Initialized. Welcome back.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-72 bg-slate-900/80 rounded-lg border border-slate-700 flex flex-col shadow-inner">
+                <div class="p-3 border-b border-slate-700 text-xs font-bold uppercase tracking-wider text-slate-300 flex justify-between items-center">
+                    <span>Stream Chat</span>
+                    <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-400">Followers Only</span>
+                </div>
+                
+                <div id="chat-box" class="flex-1 p-3 overflow-y-auto space-y-3 text-sm flex flex-col">
+                    <div class="text-slate-500 text-xs text-center border-b border-slate-700/50 pb-2 mb-2">Welcome to your chat room!</div>
+                    <div><span class="text-green-400 font-bold">⚔️ AutoMod:</span> <span class="text-slate-300">Ready to moderate.</span></div>
+                </div>
+                
+                <div class="p-3 border-t border-slate-700 bg-slate-900">
+                    <input type="text" placeholder="Send a message to chat..." class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 transition">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="h-12 window-glass border-t border-white/10 flex items-center justify-between px-4 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div class="flex items-center gap-4">
+            <button class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded flex items-center justify-center font-bold hover:scale-105 transition shadow-lg">S</button>
+            <div class="w-px h-6 bg-slate-600"></div>
+            <div class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded cursor-pointer transition">📁</div>
+            <div class="w-8 h-8 flex items-center justify-center bg-white/10 rounded cursor-pointer transition border-b-2 border-indigo-500">💻</div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex gap-2 text-slate-400 text-sm">
+                <span>🔊</span>
+                <span>🌐</span>
+            </div>
+            <div id="os-clock" class="text-xs font-mono text-slate-300 font-bold bg-slate-800/50 px-2 py-1 rounded">12:00 PM</div>
+        </div>
+    </div>
+
+    <script>
+        // OS Clock Logic
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('os-clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }, 1000);
+
+        // Simple Window Dragging Logic
+        const dragHeader = document.getElementById('window-header');
+        const dashboard = document.getElementById('dashboard-window');
+        
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        dragHeader.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            // Get current transform values or default to centering
+            const style = window.getComputedStyle(dashboard);
+            const matrix = new WebKitCSSMatrix(style.transform);
+            
+            startX = e.clientX - matrix.m41;
+            startY = e.clientY - matrix.m42;
+            dashboard.style.transition = 'none'; // Disable transition while dragging
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const newX = e.clientX - startX;
+            const newY = e.clientY - startY;
+            dashboard.style.transform = `translate(${newX}px, ${newY}px)`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            dashboard.style.transition = 'transform 0.1s ease-out';
+        });
+
+        // Basic "Go Live" Functionality
+        let isLive = false;
+        document.getElementById('btn-stream').addEventListener('click', function() {
+            isLive = !isLive;
+            const status = document.getElementById('stream-status');
+            const previewText = document.getElementById('preview-text');
+            const liveFeed = document.getElementById('live-feed');
+            
+            if (isLive) {
+                this.innerHTML = '<span>🛑</span> End Stream';
+                this.classList.replace('bg-indigo-600', 'bg-red-600');
+                this.classList.replace('hover:bg-indigo-500', 'hover:bg-red-500');
+                status.innerHTML = '<span class="animate-pulse text-red-500">🔴 LIVE</span>';
+                previewText.classList.add('hidden');
+                liveFeed.classList.remove('hidden');
+                logActivity('<span class="text-green-400">[OBS] Stream started successfully.</span>');
+            } else {
+                this.innerHTML = '<span>📡</span> Start Streaming';
+                this.classList.replace('bg-red-600', 'bg-indigo-600');
+                this.classList.replace('hover:bg-red-500', 'hover:bg-indigo-500');
+                status.innerHTML = '⚫ OFFLINE';
+                previewText.classList.remove('hidden');
+                liveFeed.classList.add('hidden');
+                logActivity('<span class="text-red-400">[OBS] Stream ended.</span>');
+            }
+        });
+
+        function logActivity(message) {
+            const log = document.getElementById('activity-log');
+            const div = document.createElement('div');
+            div.innerHTML = message;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+    </script>
+</body>
+</html>
