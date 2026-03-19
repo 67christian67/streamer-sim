@@ -29,14 +29,26 @@
         
         .emote { display: inline-block; height: 1.25rem; vertical-align: middle; margin: 0 2px; }
 
-        @keyframes popIn {
-            0% { transform: scale(0); }
-            100% { transform: scale(1); }
-        }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
         .target { animation: popIn 0.2s ease-out forwards; }
+        
+        @keyframes alertDrop {
+            0% { transform: translate(-50%, -100%); opacity: 0; }
+            10% { transform: translate(-50%, 0); opacity: 1; }
+            90% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
+        }
+        .alert-anim { animation: alertDrop 4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col text-white relative">
+
+    <div id="stream-alert" class="absolute top-10 left-1/2 transform -translate-x-1/2 z-[99999] hidden flex-col items-center pointer-events-none">
+        <img src="https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif" class="w-32 h-32 rounded-lg shadow-2xl mb-2 border-4 border-indigo-500 object-cover" id="alert-gif">
+        <div class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-extrabold shadow-2xl border-2 border-indigo-400 text-center text-lg uppercase tracking-wide" id="alert-text">
+            USER SUBSCRIBED!
+        </div>
+    </div>
 
     <div class="absolute inset-0 p-6 flex flex-col gap-6 items-start z-0">
         <div ondblclick="openWindow('dashboard-window')" class="flex flex-col items-center gap-2 w-24 hover:bg-white/10 p-2 rounded cursor-pointer transition">
@@ -57,7 +69,7 @@
         </div>
     </div>
 
-    <div id="dashboard-window" class="os-window w-[800px] h-[550px] rounded-xl flex flex-col top-[5%] left-[5%]" style="display: flex; z-index: 100;">
+    <div id="dashboard-window" class="os-window w-[850px] h-[600px] rounded-xl flex flex-col top-[5%] left-[5%]" style="display: flex; z-index: 100;">
         <div class="window-header bg-slate-900/80 p-3 flex justify-between items-center border-b border-white/10 cursor-move">
             <div class="flex items-center gap-2">
                 <div onclick="closeWindow('dashboard-window')" class="w-3 h-3 rounded-full bg-red-500 cursor-pointer hover:bg-red-400"></div>
@@ -69,21 +81,38 @@
         </div>
         <div class="flex-1 flex p-4 gap-4 overflow-hidden">
             <div class="flex-1 flex flex-col gap-4">
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-lg flex flex-col items-center justify-center shadow-inner">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Viewers</span>
+                        <span id="stat-viewers" class="text-2xl font-mono text-indigo-400 font-bold">0</span>
+                    </div>
+                    <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-lg flex flex-col items-center justify-center shadow-inner relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-fuchsia-600/10 hidden group-hover:block transition"></div>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Subs</span>
+                        <span id="stat-subs" class="text-2xl font-mono text-fuchsia-400 font-bold">0</span>
+                    </div>
+                    <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-lg flex flex-col items-center justify-center shadow-inner relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-green-600/10 hidden group-hover:block transition"></div>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Revenue</span>
+                        <span id="stat-rev" class="text-2xl font-mono text-green-400 font-bold">$0.00</span>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <button id="btn-stream" class="bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-bold text-sm transition shadow-lg">📡 Start Streaming</button>
                     <button id="btn-predict" class="bg-fuchsia-600 hover:bg-fuchsia-500 py-3 rounded-lg font-bold text-sm transition shadow-lg">🔮 Start Prediction</button>
                 </div>
+                
                 <div class="flex-1 bg-slate-900/50 border border-slate-700 rounded-lg p-3 overflow-hidden flex flex-col">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex justify-between">
-                        <span>Activity Feed</span>
-                        <span id="viewer-count" class="text-indigo-400">0 VIEWERS</span>
-                    </span>
-                    <div id="activity-log" class="flex-1 overflow-y-auto space-y-1 text-xs font-mono pr-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Activity Feed</span>
+                    <div id="activity-log" class="flex-1 overflow-y-auto space-y-2 text-xs font-mono pr-2">
                         <div class="text-slate-400">[SYSTEM] OS Initialized.</div>
                     </div>
                 </div>
             </div>
-            <div class="w-72 bg-slate-900/80 rounded-lg border border-slate-700 flex flex-col shadow-inner relative">
+
+            <div class="w-80 bg-slate-900/80 rounded-lg border border-slate-700 flex flex-col shadow-inner relative">
                 <div class="p-3 border-b border-slate-700 text-xs font-bold uppercase tracking-wider text-slate-300 flex justify-between items-center bg-slate-800/50">
                     <span>Stream Chat</span>
                 </div>
@@ -91,7 +120,7 @@
                     <div class="text-slate-500 text-xs text-center border-b border-slate-700/50 pb-2 mb-2">Welcome to your chat room!</div>
                 </div>
                 <div class="p-3 border-t border-slate-700 bg-slate-900">
-                    <input type="text" id="chat-input" placeholder="Chat here..." class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-white outline-none focus:border-indigo-500">
+                    <input type="text" id="chat-input" placeholder="Chat as Broadcaster..." class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm text-white outline-none focus:border-indigo-500">
                 </div>
             </div>
         </div>
@@ -132,8 +161,6 @@
         <div class="window-header bg-slate-800 p-2 flex items-center gap-3 border-b border-white/10 cursor-move">
             <div class="flex items-center gap-2 pl-2">
                 <div onclick="closeWindow('browser-window')" class="w-3 h-3 rounded-full bg-red-500 cursor-pointer hover:bg-red-400"></div>
-                <div class="w-3 h-3 rounded-full bg-yellow-500 cursor-pointer"></div>
-                <div class="w-3 h-3 rounded-full bg-green-500 cursor-pointer"></div>
             </div>
             <div class="flex gap-2 text-slate-400 px-2">
                 <button class="hover:text-white">◀</button>
@@ -150,37 +177,16 @@
                     <span class="text-6xl cursor-pointer hover:scale-110 transition" onclick="playVideo('Welcome to ViewTube', 'neutral')">▶️</span>
                 </div>
                 <h1 id="video-title" class="text-xl font-bold mt-4">Welcome to ViewTube</h1>
-                <p class="text-sm text-slate-400 mt-1 border-b border-slate-700 pb-4">1,204,555 views • 2 days ago</p>
-                <div class="flex gap-4 mt-4 text-sm font-bold">
-                    <button class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full">👍 14K</button>
-                    <button class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full">👎 Dislike</button>
-                </div>
             </div>
             <div class="w-72 p-4 flex flex-col gap-4 overflow-y-auto bg-slate-800">
                 <h3 class="font-bold text-sm text-slate-300">Recommended</h3>
-                
                 <div class="flex gap-2 cursor-pointer hover:bg-slate-700 p-1 rounded transition" onclick="playVideo('Top 10 Gamer Fails', 'fail')">
                     <div class="w-24 h-16 bg-red-900 rounded flex items-center justify-center text-xs border border-red-700">FAIL</div>
-                    <div class="flex-1 flex flex-col justify-center">
-                        <span class="text-sm font-bold leading-tight">Top 10 Gamer Fails</span>
-                        <span class="text-[10px] text-slate-400">ViewTube Gaming</span>
-                    </div>
+                    <div class="flex-1 flex flex-col justify-center"><span class="text-sm font-bold leading-tight">Top 10 Gamer Fails</span></div>
                 </div>
-
                 <div class="flex gap-2 cursor-pointer hover:bg-slate-700 p-1 rounded transition" onclick="playVideo('Insane Speedrun WR', 'hype')">
                     <div class="w-24 h-16 bg-green-900 rounded flex items-center justify-center text-xs border border-green-700">WR</div>
-                    <div class="flex-1 flex flex-col justify-center">
-                        <span class="text-sm font-bold leading-tight">Insane Speedrun WR</span>
-                        <span class="text-[10px] text-slate-400">SpeedyBoi</span>
-                    </div>
-                </div>
-
-                <div class="flex gap-2 cursor-pointer hover:bg-slate-700 p-1 rounded transition" onclick="playVideo('My Apology.', 'sad')">
-                    <div class="w-24 h-16 bg-slate-900 rounded flex items-center justify-center text-xs border border-slate-700">SIGH</div>
-                    <div class="flex-1 flex flex-col justify-center">
-                        <span class="text-sm font-bold leading-tight">My Apology.</span>
-                        <span class="text-[10px] text-slate-400">DramaAlert</span>
-                    </div>
+                    <div class="flex-1 flex flex-col justify-center"><span class="text-sm font-bold leading-tight">Insane Speedrun WR</span></div>
                 </div>
             </div>
         </div>
@@ -231,16 +237,9 @@
         let currentVideoMood = 'neutral';
         function playVideo(title, mood) {
             document.getElementById('video-title').innerText = title;
-            document.getElementById('video-player').innerHTML = `
-                <div class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 animate-pulse relative">
-                    <div class="absolute bottom-0 left-0 h-1 bg-red-600 w-full animate-[progress_10s_linear]"></div>
-                    Playing: ${title}...
-                </div>`;
+            document.getElementById('video-player').innerHTML = `<div class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 animate-pulse relative">Playing: ${title}...</div>`;
             currentVideoMood = mood;
-            
-            if (isLive) {
-                appendChat('AutoMod', `Now reacting to: ${title}`, 'text-green-400');
-            }
+            if (isLive) appendChat('AutoMod', `Now reacting to: ${title}`, 'text-green-400');
         }
 
         // --- GAME LOGIC ---
@@ -282,7 +281,7 @@
             if (gameActive) { gameScore = Math.max(0, gameScore - 5); document.getElementById('game-score').innerText = gameScore; }
         }
 
-        // --- STREAM & CHAT SYSTEM ---
+        // --- STREAM & CHAT & ECONOMY SYSTEM ---
         const bttvEmotes = {
             'pepeD': 'https://cdn.betterttv.net/emote/5b1740221c5a6065a7bad4b5/1x.webp',
             'POGGERS': 'https://cdn.betterttv.net/emote/58ae8407ff7b7276f8e594f2/1x.webp',
@@ -291,11 +290,18 @@
             'KEKW': 'https://cdn.betterttv.net/emote/5e9c6c187e090362f8b0b9e8/1x.webp'
         };
 
-        const viewers = ['SaltyGamer', 'Luna_B', 'ChadW', 'TechBro', 'ReactAndy'];
+        const viewersList = ['SaltyGamer', 'Luna_B', 'ChadW', 'TechBro', 'ReactAndy', 'WhaleSpender99'];
         const baseMessages = ['W', 'L', 'POGGERS', 'pepeD', 'bro what KEKW', 'SON'];
         
         const chatBox = document.getElementById('chat-box');
-        let isLive = false; let viewersCount = 0; let chatInterval, viewerInterval;
+        const activityLog = document.getElementById('activity-log');
+        
+        let isLive = false; 
+        let viewersCount = 0; 
+        let subCount = 0;
+        let revenueAmount = 0.00;
+        
+        let chatInterval, viewerInterval, economyInterval;
 
         function appendChat(user, msg, color = 'text-slate-300') {
             let parsedMsg = msg;
@@ -307,12 +313,65 @@
             if (chatBox.children.length > 40) chatBox.removeChild(chatBox.firstChild);
         }
 
+        function logActivity(html) {
+            activityLog.innerHTML += `<div>${html}</div>`;
+            activityLog.scrollTop = activityLog.scrollHeight;
+        }
+
         document.getElementById('chat-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && this.value.trim() !== '') {
                 appendChat('🎥 You', this.value, 'text-red-400');
                 this.value = '';
             }
         });
+
+        // --- NEW: TRIGGER ALERTS FUNCTION ---
+        function triggerAlert() {
+            const types = ['sub', 'dono'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const user = viewersList[Math.floor(Math.random() * viewersList.length)];
+            const alertBox = document.getElementById('stream-alert');
+            const alertText = document.getElementById('alert-text');
+            const alertGif = document.getElementById('alert-gif');
+
+            // Reset animation
+            alertBox.classList.remove('hidden', 'alert-anim');
+            void alertBox.offsetWidth; // trigger reflow
+            alertBox.classList.add('flex', 'alert-anim');
+
+            if (type === 'sub') {
+                subCount++;
+                revenueAmount += 2.50; // $2.50 per sub
+                alertGif.src = 'https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif';
+                alertText.innerHTML = `⭐ <span class="text-yellow-300">${user}</span> JUST SUBSCRIBED!`;
+                
+                logActivity(`<span class="text-fuchsia-400">[SUB] ${user} subscribed!</span>`);
+                appendChat('SystemBot', `Thank you ${user} for subscribing!`, 'text-fuchsia-400');
+                
+                // Chat reacts to sub
+                setTimeout(() => appendChat('ChadW', 'W', 'text-slate-300'), 500);
+                setTimeout(() => appendChat('Luna_B', 'POGGERS', 'text-slate-300'), 800);
+            } 
+            else if (type === 'dono') {
+                const donoAmt = (Math.floor(Math.random() * 20) + 1).toFixed(2);
+                revenueAmount += parseFloat(donoAmt);
+                alertGif.src = 'https://media.giphy.com/media/lptjRBxFKCJmFoibP3/giphy.gif';
+                alertText.innerHTML = `💸 <span class="text-green-300">${user}</span> DONATED $${donoAmt}!`;
+                
+                logActivity(`<span class="text-green-400">[DONO] ${user} tipped $${donoAmt}</span>`);
+                appendChat('SystemBot', `${user} tipped $${donoAmt}!`, 'text-green-400');
+            }
+
+            // Update Dashboard Stats
+            document.getElementById('stat-subs').innerText = subCount;
+            document.getElementById('stat-rev').innerText = `$${revenueAmount.toFixed(2)}`;
+
+            // Hide alert after animation finishes
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+                alertBox.classList.remove('flex', 'alert-anim');
+            }, 4000);
+        }
 
         document.getElementById('btn-stream').addEventListener('click', function() {
             isLive = !isLive;
@@ -323,33 +382,41 @@
                 this.classList.replace('bg-indigo-600', 'bg-red-600');
                 status.innerHTML = '<span class="text-red-500 animate-pulse">🔴 LIVE</span>';
                 appendChat('System', 'You went live!', 'text-indigo-400');
+                logActivity('<span class="text-green-400">[OBS] Stream Started. Connected to ingest server.</span>');
                 
                 viewersCount = 45;
+                document.getElementById('stat-viewers').innerText = viewersCount;
+
                 viewerInterval = setInterval(() => {
                     viewersCount += Math.floor(Math.random() * 9) - 4;
-                    document.getElementById('viewer-count').innerText = `${Math.max(1, viewersCount)} VIEWERS`;
+                    document.getElementById('stat-viewers').innerText = Math.max(1, viewersCount);
                 }, 3000);
 
                 chatInterval = setInterval(() => {
                     if (Math.random() > 0.3) {
                         let msg = baseMessages[Math.floor(Math.random() * baseMessages.length)];
-                        
-                        // Override chat with context-specific reactions based on what you're watching!
                         if (currentVideoMood === 'fail' && Math.random() > 0.4) msg = 'KEKW';
                         if (currentVideoMood === 'hype' && Math.random() > 0.4) msg = 'POGGERS';
                         if (currentVideoMood === 'sad' && Math.random() > 0.4) msg = 'monkaW';
-
-                        appendChat(viewers[Math.floor(Math.random() * viewers.length)], msg);
+                        appendChat(viewersList[Math.floor(Math.random() * viewersList.length)], msg);
                     }
                 }, 1500);
+
+                // Start Economy Engine (Random Subs/Donos every 10-15 seconds)
+                economyInterval = setInterval(() => {
+                    if (Math.random() > 0.6) triggerAlert();
+                }, 12000);
 
             } else {
                 this.innerHTML = '📡 Start Streaming';
                 this.classList.replace('bg-red-600', 'bg-indigo-600');
                 status.innerHTML = '⚫ OFFLINE';
-                document.getElementById('viewer-count').innerText = `0 VIEWERS`;
+                document.getElementById('stat-viewers').innerText = `0`;
+                logActivity('<span class="text-red-400">[OBS] Stream Ended.</span>');
+                
                 clearInterval(chatInterval);
                 clearInterval(viewerInterval);
+                clearInterval(economyInterval);
                 currentVideoMood = 'neutral';
             }
         });
